@@ -1,1 +1,271 @@
-<p>reports works!</p>
+<app-header></app-header>
+
+<div class="reports-container">
+  <div class="page-header">
+    <h1>Reports & Analytics</h1>
+    <button mat-button routerLink="/admin/dashboard">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Dashboard
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading reports...</p>
+    </div>
+  }
+
+  @if (!isLoading) {
+    <mat-tab-group>
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="tab-content">
+          <!-- Pending vs Resolved -->
+          @if (pendingVsResolved) {
+            <mat-card class="report-card">
+              <mat-card-header>
+                <mat-card-title>Pending vs Resolved</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="overview-stats">
+                  <div class="stat-box pending">
+                    <h2>{{ pendingVsResolved.pending }}</h2>
+                    <p>Pending</p>
+                  </div>
+                  <div class="stat-box resolved">
+                    <h2>{{ pendingVsResolved.resolved }}</h2>
+                    <p>Resolved</p>
+                  </div>
+                  <div class="stat-box total">
+                    <h2>{{ pendingVsResolved.total }}</h2>
+                    <p>Total</p>
+                  </div>
+                </div>
+                <div class="progress-bar">
+                  <div class="resolved-bar" [style.width.%]="(pendingVsResolved.resolved / pendingVsResolved.total) * 100"></div>
+                </div>
+                <p class="resolution-rate">
+                  Resolution Rate: {{ ((pendingVsResolved.resolved / pendingVsResolved.total) * 100).toFixed(1) }}%
+                </p>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          <!-- Average Resolution Time -->
+          @if (averageResolutionTime) {
+            <mat-card class="report-card">
+              <mat-card-header>
+                <mat-card-title>Average Resolution Time</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="resolution-time-stats">
+                  <div class="time-stat">
+                    <mat-icon>schedule</mat-icon>
+                    <h2>{{ averageResolutionTime.averageHours }}</h2>
+                    <p>Hours</p>
+                  </div>
+                  <div class="time-stat">
+                    <mat-icon>calendar_today</mat-icon>
+                    <h2>{{ averageResolutionTime.averageDays }}</h2>
+                    <p>Days</p>
+                  </div>
+                  <div class="time-stat">
+                    <mat-icon>check_circle</mat-icon>
+                    <h2>{{ averageResolutionTime.totalResolved }}</h2>
+                    <p>Total Resolved</p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- By Status Tab -->
+      <mat-tab label="By Status">
+        <div class="tab-content">
+          @if (grievancesByStatus) {
+            <mat-card class="report-card">
+              <mat-card-header>
+                <mat-card-title>Grievances by Status</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="status-bars">
+                  @for (status of getKeys(grievancesByStatus); track status) {
+                    <div class="status-bar-item">
+                      <div class="status-label">
+                        <span class="status-name">{{ status }}</span>
+                        <span class="status-count">{{ grievancesByStatus[status] }}</span>
+                      </div>
+                      <div class="bar-container">
+                        <div class="bar" [style.width.%]="(grievancesByStatus[status] / (pendingVsResolved?.total || 1)) * 100" [style.background-color]="getStatusColor(status)"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- By Department Tab -->
+      <mat-tab label="By Department">
+        <div class="tab-content">
+          @if (grievancesByDepartment) {
+            <mat-card class="report-card">
+              <mat-card-header>
+                <mat-card-title>Grievances by Department</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="department-list">
+                  @for (dept of getKeys(grievancesByDepartment); track dept) {
+                    <div class="department-row">
+                      <span class="dept-name">{{ dept }}</span>
+                      <span class="dept-count">{{ grievancesByDepartment[dept] }}</span>
+                      <div class="dept-bar">
+                        <div class="bar" [style.width.%]="(grievancesByDepartment[dept] / (pendingVsResolved?.total || 1)) * 100"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          @if (departmentPerformance) {
+            <mat-card class="report-card">
+              <mat-card-header>
+                <mat-card-title>Department Performance</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="performance-grid">
+                  @for (dept of getKeys(departmentPerformance); track dept) {
+                    <div class="performance-card">
+                      <h4>{{ dept }}</h4>
+                      <div class="metrics">
+                        <div class="metric">
+                          <span class="value">{{ departmentPerformance[dept].totalGrievances }}</span>
+                          <span class="label">Total</span>
+                        </div>
+                        <div class="metric">
+                          <span class="value success">{{ departmentPerformance[dept].resolved }}</span>
+                          <span class="label">Resolved</span>
+                        </div>
+                        <div class="metric">
+                          <span class="value warning">{{ departmentPerformance[dept].pending }}</span>
+                          <span class="label">Pending</span>
+                        </div>
+                        <div class="metric">
+                          <span class="value">{{ departmentPerformance[dept].resolutionRate }}%</span>
+                          <span class="label">Resolution Rate</span>
+                        </div>
+                        <div class="metric">
+                          <span class="value">{{ departmentPerformance[dept].avgResolutionHours }} hrs</span>
+                          <span class="label">Avg. Time</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- By Category Tab -->
+      <mat-tab label="By Category">
+        <div class="tab-content">
+          @if (grievancesByCategory) {
+            <mat-card class="report-card">
+              <mat-card-header>
+                <mat-card-title>Grievances by Category</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="category-list">
+                  @for (cat of getKeys(grievancesByCategory); track cat) {
+                    <div class="category-row">
+                      <span class="cat-name">{{ cat }}</span>
+                      <span class="cat-count">{{ grievancesByCategory[cat] }}</span>
+                      <div class="cat-bar">
+                        <div class="bar" [style.width.%]="(grievancesByCategory[cat] / (pendingVsResolved?.total || 1)) * 100"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Monthly Trends Tab -->
+      <mat-tab label="Monthly Trends">
+        <div class="tab-content">
+          @if (monthlyTrends) {
+            <mat-card class="report-card">
+              <mat-card-header>
+                <mat-card-title>Monthly Grievance Trends</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="monthly-list">
+                  @for (month of getKeys(monthlyTrends); track month) {
+                    <div class="month-row">
+                      <span class="month-name">{{ month }}</span>
+                      <span class="month-count">{{ monthlyTrends[month] }}</span>
+                      <div class="month-bar">
+                        <div class="bar" [style.width.%]="(monthlyTrends[month] / (pendingVsResolved?.total || 1)) * 100"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Officer Workload Tab -->
+      <mat-tab label="Officer Workload">
+        <div class="tab-content">
+          @if (officerWorkload) {
+            <mat-card class="report-card">
+              <mat-card-header>
+                <mat-card-title>Officer Workload</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="officer-grid">
+                  @for (officerId of getKeys(officerWorkload); track officerId) {
+                    <div class="officer-card">
+                      <h4>Officer ID: {{ officerId }}</h4>
+                      <div class="officer-stats">
+                        <div class="stat">
+                          <span class="value">{{ officerWorkload[officerId].totalAssigned }}</span>
+                          <span class="label">Total Assigned</span>
+                        </div>
+                        <div class="stat">
+                          <span class="value success">{{ officerWorkload[officerId].resolved }}</span>
+                          <span class="label">Resolved</span>
+                        </div>
+                        <div class="stat">
+                          <span class="value warning">{{ officerWorkload[officerId].inProgress }}</span>
+                          <span class="label">In Progress</span>
+                        </div>
+                        <div class="stat">
+                          <span class="value danger">{{ officerWorkload[officerId].escalated }}</span>
+                          <span class="label">Escalated</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>
