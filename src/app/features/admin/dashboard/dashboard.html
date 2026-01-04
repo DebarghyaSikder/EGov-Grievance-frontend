@@ -1,1 +1,170 @@
-<p>dashboard works!</p>
+<app-header></app-header>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <button mat-raised-button color="primary" routerLink="/admin/reports">
+      <mat-icon>assessment</mat-icon>
+      View Reports
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  }
+
+  @if (!isLoading && dashboardSummary) {
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+      <mat-card class="stat-card total">
+        <mat-card-content>
+          <mat-icon>description</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.totalGrievances }}</h3>
+            <p>Total Grievances</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card pending">
+        <mat-card-content>
+          <mat-icon>pending_actions</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.pendingCount }}</h3>
+            <p>Pending</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card escalated">
+        <mat-card-content>
+          <mat-icon>warning</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.escalatedCount }}</h3>
+            <p>Escalated</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card resolved">
+        <mat-card-content>
+          <mat-icon>check_circle</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.resolvedCount }}</h3>
+            <p>Resolved</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card today">
+        <mat-card-content>
+          <mat-icon>today</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.todayCount }}</h3>
+            <p>Today</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card week">
+        <mat-card-content>
+          <mat-icon>date_range</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.thisWeekCount }}</h3>
+            <p>This Week</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card sla-breached">
+        <mat-card-content>
+          <mat-icon>error</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.slaBreachedCount }}</h3>
+            <p>SLA Breached</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Status Breakdown -->
+    @if (dashboardSummary.byStatus) {
+      <mat-card class="status-breakdown-card">
+        <mat-card-header>
+          <mat-card-title>Grievances by Status</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-grid">
+            @for (status of ['PENDING', 'ASSIGNED', 'IN_PROGRESS', 'ESCALATED', 'RESOLVED', 'CLOSED']; track status) {
+              <div class="status-item" [ngClass]="'status-' + status.toLowerCase().replace('_', '-')">
+                <span class="status-label">{{ status }}</span>
+                <span class="status-count">{{ dashboardSummary.byStatus[status] || 0 }}</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Department Performance -->
+    @if (departmentPerformance) {
+      <mat-card class="department-performance-card">
+        <mat-card-header>
+          <mat-card-title>Department Performance</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="department-grid">
+            @for (dept of getDepartmentKeys(); track dept) {
+              <div class="department-item">
+                <h4>{{ dept }}</h4>
+                <div class="dept-stats">
+                  <div class="dept-stat">
+                    <span class="label">Total</span>
+                    <span class="value">{{ departmentPerformance[dept].totalGrievances }}</span>
+                  </div>
+                  <div class="dept-stat">
+                    <span class="label">Resolved</span>
+                    <span class="value resolved">{{ departmentPerformance[dept].resolved }}</span>
+                  </div>
+                  <div class="dept-stat">
+                    <span class="label">Pending</span>
+                    <span class="value pending">{{ departmentPerformance[dept].pending }}</span>
+                  </div>
+                  <div class="dept-stat">
+                    <span class="label">Resolution Rate</span>
+                    <span class="value">{{ departmentPerformance[dept].resolutionRate }}%</span>
+                  </div>
+                  <div class="dept-stat">
+                    <span class="label">Avg. Resolution (hrs)</span>
+                    <span class="value">{{ departmentPerformance[dept].avgResolutionHours }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Quick Links -->
+    <mat-card class="quick-links-card">
+      <mat-card-header>
+        <mat-card-title>Quick Links</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="quick-links-grid">
+          <button mat-stroked-button routerLink="/supervisor/all-grievances">
+            <mat-icon>list</mat-icon>
+            All Grievances
+          </button>
+          <button mat-stroked-button routerLink="/admin/reports">
+            <mat-icon>assessment</mat-icon>
+            Reports & Analytics
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

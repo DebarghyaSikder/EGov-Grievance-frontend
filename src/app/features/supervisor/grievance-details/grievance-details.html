@@ -1,1 +1,172 @@
-<p>grievance-details works!</p>
+<app-header></app-header>
+
+<div class="grievance-details-container">
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  }
+
+  @if (!isLoading && grievance) {
+    <div class="page-header">
+      <button mat-button routerLink="/supervisor/all-grievances">
+        <mat-icon>arrow_back</mat-icon>
+        Back to All Grievances
+      </button>
+    </div>
+
+    <mat-card class="details-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{ grievance.grievanceNumber }}
+          @if (isOverdue()) {
+            <mat-icon class="overdue-icon">error</mat-icon>
+            <span class="overdue-text">SLA Breached</span>
+          }
+        </mat-card-title>
+        <mat-card-subtitle>
+          <span class="status-chip" [ngClass]="getStatusClass(grievance.status)">
+            {{ grievance.status }}
+          </span>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <h2>{{ grievance.title }}</h2>
+
+        <div class="details-grid">
+          <div class="detail-item">
+            <mat-icon>business</mat-icon>
+            <div>
+              <label>Department</label>
+              <p>{{ grievance.departmentName }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>category</mat-icon>
+            <div>
+              <label>Category</label>
+              <p>{{ grievance.categoryName }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>person</mat-icon>
+            <div>
+              <label>Assigned Officer ID</label>
+              <p>{{ grievance.assignedOfficerId || 'Not Assigned' }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item" [class.overdue]="isOverdue()">
+            <mat-icon>schedule</mat-icon>
+            <div>
+              <label>SLA Deadline</label>
+              <p>{{ grievance.slaDeadline | date:'medium' }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>calendar_today</mat-icon>
+            <div>
+              <label>Created At</label>
+              <p>{{ grievance.createdAt | date:'medium' }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>person_outline</mat-icon>
+            <div>
+              <label>Citizen ID</label>
+              <p>{{ grievance.citizenId }}</p>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="description-section">
+          <h3>Description</h3>
+          <p>{{ grievance.description }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Actions Card -->
+    <mat-card class="actions-card">
+      <mat-card-header>
+        <mat-card-title>Actions</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-tab-group>
+          <!-- Update Status Tab -->
+          <mat-tab label="Update Status">
+            @if (canUpdateStatus()) {
+              <form [formGroup]="statusForm" (ngSubmit)="updateStatus()" class="action-form">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>New Status</mat-label>
+                  <mat-select formControlName="status">
+                    @for (status of availableStatuses; track status.value) {
+                      <mat-option [value]="status.value">{{ status.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Remarks</mat-label>
+                  <textarea matInput formControlName="remarks" rows="3" placeholder="Provide remarks..."></textarea>
+                </mat-form-field>
+
+                <button mat-raised-button color="primary" type="submit" [disabled]="isUpdatingStatus">
+                  @if (isUpdatingStatus) { <mat-spinner diameter="20"></mat-spinner> }
+                  Update Status
+                </button>
+              </form>
+            } @else {
+              <p class="disabled-message">Status cannot be updated for closed grievances.</p>
+            }
+          </mat-tab>
+
+          <!-- Escalate Tab -->
+          <mat-tab label="Escalate">
+            @if (canEscalate()) {
+              <form [formGroup]="escalateForm" (ngSubmit)="escalate()" class="action-form">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Escalation Reason</mat-label>
+                  <textarea matInput formControlName="reason" rows="3" placeholder="Provide reason for escalation..."></textarea>
+                </mat-form-field>
+
+                <button mat-raised-button color="warn" type="submit" [disabled]="isEscalating">
+                  @if (isEscalating) { <mat-spinner diameter="20"></mat-spinner> }
+                  Escalate Grievance
+                </button>
+              </form>
+            } @else {
+              <p class="disabled-message">This grievance cannot be escalated.</p>
+            }
+          </mat-tab>
+
+          <!-- Reassign Tab -->
+          <mat-tab label="Reassign">
+            @if (canReassign()) {
+              <form [formGroup]="reassignForm" (ngSubmit)="reassign()" class="action-form">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>New Officer ID</mat-label>
+                  <input matInput type="number" formControlName="officerId" placeholder="Enter officer ID">
+                </mat-form-field>
+
+                <button mat-raised-button color="accent" type="submit" [disabled]="isReassigning">
+                  @if (isReassigning) { <mat-spinner diameter="20"></mat-spinner> }
+                  Reassign Grievance
+                </button>
+              </form>
+            } @else {
+              <p class="disabled-message">This grievance cannot be reassigned.</p>
+            }
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
