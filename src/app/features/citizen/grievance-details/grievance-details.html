@@ -1,1 +1,180 @@
-<p>grievance-details works!</p>
+<app-header></app-header>
+
+<div class="grievance-details-container">
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  }
+
+  @if (!isLoading && grievance) {
+    <div class="page-header">
+      <button mat-button routerLink="/citizen/my-grievances">
+        <mat-icon>arrow_back</mat-icon>
+        Back to My Grievances
+      </button>
+    </div>
+
+    <mat-card class="details-card">
+      <mat-card-header>
+        <mat-card-title>{{ grievance.grievanceNumber }}</mat-card-title>
+        <mat-card-subtitle>
+          <span class="status-chip" [ngClass]="getStatusClass(grievance.status)">
+            {{ grievance.status }}
+          </span>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <h2>{{ grievance.title }}</h2>
+
+        <div class="details-grid">
+          <div class="detail-item">
+            <mat-icon>business</mat-icon>
+            <div>
+              <label>Department</label>
+              <p>{{ grievance.departmentName }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>category</mat-icon>
+            <div>
+              <label>Category</label>
+              <p>{{ grievance.categoryName }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>label</mat-icon>
+            <div>
+              <label>Sub-Category</label>
+              <p>{{ grievance.subCategoryName }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>schedule</mat-icon>
+            <div>
+              <label>SLA Deadline</label>
+              <p>{{ grievance.slaDeadline | date:'medium' }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>calendar_today</mat-icon>
+            <div>
+              <label>Created At</label>
+              <p>{{ grievance.createdAt | date:'medium' }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>update</mat-icon>
+            <div>
+              <label>Last Updated</label>
+              <p>{{ grievance.updatedAt | date:'medium' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="description-section">
+          <h3>Description</h3>
+          <p>{{ grievance.description }}</p>
+        </div>
+
+        @if (grievance.resolvedAt) {
+          <mat-divider></mat-divider>
+          <div class="resolution-section">
+            <h3>Resolution</h3>
+            <p><strong>Resolved At:</strong> {{ grievance.resolvedAt | date:'medium' }}</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Feedback Section -->
+    <mat-card class="feedback-card">
+      <mat-card-header>
+        <mat-card-title>Feedback</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (feedback) {
+          <div class="existing-feedback">
+            <div class="rating">
+              <label>Your Rating:</label>
+              <div class="stars">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <mat-icon [class.filled]="star <= feedback.rating">star</mat-icon>
+                }
+              </div>
+            </div>
+            <div class="comments">
+              <label>Your Comments:</label>
+              <p>{{ feedback.comments }}</p>
+            </div>
+            @if (feedback.reopenRequested) {
+              <div class="reopen-request">
+                <mat-icon>info</mat-icon>
+                <span>You requested to reopen this grievance.</span>
+              </div>
+            }
+          </div>
+        } @else if (canSubmitFeedback()) {
+          @if (!showFeedbackForm) {
+            <div class="feedback-prompt">
+              <p>Your grievance has been resolved. Please provide your feedback.</p>
+              <button mat-raised-button color="primary" (click)="toggleFeedbackForm()">
+                <mat-icon>rate_review</mat-icon>
+                Submit Feedback
+              </button>
+            </div>
+          } @else {
+            <form [formGroup]="feedbackForm" (ngSubmit)="submitFeedback()">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Rating</mat-label>
+                <mat-select formControlName="rating">
+                  @for (r of ratings; track r) {
+                    <mat-option [value]="r">{{ r }} Star{{ r > 1 ? 's' : '' }}</mat-option>
+                  }
+                </mat-select>
+                @if (feedbackForm.get('rating')?.hasError('required') && feedbackForm.get('rating')?.touched) {
+                  <mat-error>Please select a rating</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Comments</mat-label>
+                <textarea matInput formControlName="comments" rows="4" placeholder="Share your experience..."></textarea>
+                @if (feedbackForm.get('comments')?.hasError('required') && feedbackForm.get('comments')?.touched) {
+                  <mat-error>Comments are required</mat-error>
+                }
+                @if (feedbackForm.get('comments')?.hasError('minlength')) {
+                  <mat-error>Comments must be at least 10 characters</mat-error>
+                }
+              </mat-form-field>
+
+              <div class="form-actions">
+                <button mat-button type="button" (click)="toggleFeedbackForm()">Cancel</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="isSubmittingFeedback">
+                  @if (isSubmittingFeedback) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  }
+                  Submit Feedback
+                </button>
+              </div>
+            </form>
+          }
+        } @else {
+          <div class="feedback-unavailable">
+            <mat-icon>info</mat-icon>
+            <p>Feedback can be submitted once the grievance is resolved.</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
