@@ -1,4 +1,6 @@
+// All @use rules must be at the top
 @use '@angular/material' as mat;
+@use 'ngx-toastr/toastr' as toastr;
 
 @include mat.core();
 
@@ -13,9 +15,6 @@ $theme: mat.m2-define-light-theme((
 ));
 
 @include mat.all-component-themes($theme);
-
-// Import ngx-toastr using @use
-@use 'ngx-toastr/toastr' as toastr;
 
 html, body {
   height: 100%;

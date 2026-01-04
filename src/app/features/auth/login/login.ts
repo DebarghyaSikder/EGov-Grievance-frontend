@@ -47,28 +47,30 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
-      return;
-    }
-
-    this.isLoading = true;
-    this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        if (response.success) {
-          this.toastr.success('Login successful!', 'Welcome');
-          this.navigateBasedOnRole(response.data.role);
-        } else {
-          this.toastr.error(response.message, 'Login Failed');
-        }
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.toastr.error(error.error?.message || 'Login failed. Please try again.', 'Error');
-      }
-    });
+  if (this.loginForm.invalid) {
+    this.loginForm.markAllAsTouched();
+    return;
   }
+
+  this.isLoading = true;
+  this.authService.login(this.loginForm.value).subscribe({
+    next: (response: any) => {
+      this.isLoading = false;
+      // Backend returns { message, token, role, userId } on success
+      if (response && response.token) {
+        this.toastr.success('Login successful!', 'Welcome');
+        this.navigateBasedOnRole(response.role);
+      } else {
+        this.toastr.error(response.message || 'Login failed', 'Error');
+      }
+    },
+    error: (error) => {
+      this.isLoading = false;
+      const errorMessage = error.error?.message || error.message || 'Login failed. Please try again.';
+      this.toastr.error(errorMessage, 'Error');
+    }
+  });
+}
 
   private navigateBasedOnRole(role: UserRole): void {
     switch (role) {

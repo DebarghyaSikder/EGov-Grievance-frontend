@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginRequest, RegisterRequest, User, UserRole } from '../models/user.model';
+import { LoginRequest, RegisterRequest, User, UserRole } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -24,20 +24,20 @@ export class AuthService {
     }
   }
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, request);
+  register(request: RegisterRequest): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/register`, request);
   }
 
-  login(request: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, request).pipe(
-      tap(response => {
-        if (response.success && response.data) {
-          localStorage.setItem('token', response.data.token);
+  login(request: LoginRequest): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, request).pipe(
+      tap((response: any) => {
+        if (response && response.token) {
+          localStorage.setItem('token', response.token);
           const user: User = {
-            id: response.data.userId,
-            email: response.data.email,
-            fullName: response.data.fullName,
-            role: response.data.role,
+            id: response.userId,
+            email: request.email,
+            fullName: response.fullName || '',
+            role: response.role as UserRole,
             phone: '',
             aadhaarNumber: ''
           };

@@ -74,28 +74,31 @@ export class RegisterComponent {
   }
 
   onSubmit(): void {
-    if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched();
-      return;
-    }
-
-    this.isLoading = true;
-    const { confirmPassword, ...registerData } = this.registerForm.value;
-
-    this.authService.register(registerData).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        if (response.success) {
-          this.toastr.success('Registration successful! Please login.', 'Success');
-          this.router.navigate(['/login']);
-        } else {
-          this.toastr.error(response.message, 'Registration Failed');
-        }
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.toastr.error(error.error?.message || 'Registration failed. Please try again.', 'Error');
-      }
-    });
+  if (this.registerForm.invalid) {
+    this.registerForm.markAllAsTouched();
+    return;
   }
+
+  this.isLoading = true;
+  const { confirmPassword, ...registerData } = this.registerForm.value;
+
+  this.authService.register(registerData).subscribe({
+    next: (response: any) => {
+      this.isLoading = false;
+      // Backend returns { message, token, role, userId } on success
+      // No 'success' field, so we check if userId exists
+      if (response && (response.userId || response.message?.toLowerCase().includes('successful'))) {
+        this.toastr.success('Registration successful! Please login.', 'Success');
+        this.router.navigate(['/login']);
+      } else {
+        this.toastr.error(response.message || 'Registration failed', 'Error');
+      }
+    },
+    error: (error) => {
+      this.isLoading = false;
+      const errorMessage = error.error?.message || error.message || 'Registration failed. Please try again.';
+      this.toastr.error(errorMessage, 'Error');
+    }
+  });
+}
 }
