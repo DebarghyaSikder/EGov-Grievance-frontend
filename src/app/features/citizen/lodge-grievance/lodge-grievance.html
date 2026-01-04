@@ -1,1 +1,122 @@
-<p>lodge-grievance works!</p>
+<app-header></app-header>
+
+<div class="lodge-grievance-container">
+  <mat-card class="lodge-grievance-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>add_circle</mat-icon>
+        Lodge New Grievance
+      </mat-card-title>
+      <mat-card-subtitle>Fill in the details below to submit your grievance</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (isLoading) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading departments...</p>
+        </div>
+      }
+
+      @if (!isLoading) {
+        <form [formGroup]="grievanceForm" (ngSubmit)="onSubmit()">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Department</mat-label>
+              <mat-select formControlName="departmentId" (selectionChange)="onDepartmentChange($event)">
+                @for (dept of departments; track dept.id) {
+                  <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
+                }
+              </mat-select>
+              <mat-icon matSuffix>business</mat-icon>
+              @if (grievanceForm.get('departmentId')?.hasError('required') && grievanceForm.get('departmentId')?.touched) {
+                <mat-error>Please select a department</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="categoryId" (selectionChange)="onCategoryChange($event)" [disabled]="categories.length === 0">
+                @for (cat of categories; track cat.id) {
+                  <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+                }
+              </mat-select>
+              <mat-icon matSuffix>category</mat-icon>
+              @if (grievanceForm.get('categoryId')?.hasError('required') && grievanceForm.get('categoryId')?.touched) {
+                <mat-error>Please select a category</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Sub-Category</mat-label>
+              <mat-select formControlName="subCategoryId" (selectionChange)="onSubCategoryChange($event)" [disabled]="subCategories.length === 0">
+                @for (subCat of subCategories; track subCat.id) {
+                  <mat-option [value]="subCat.id">{{ subCat.name }} (SLA: {{ subCat.slaHours }} hours)</mat-option>
+                }
+              </mat-select>
+              <mat-icon matSuffix>label</mat-icon>
+              @if (grievanceForm.get('subCategoryId')?.hasError('required') && grievanceForm.get('subCategoryId')?.touched) {
+                <mat-error>Please select a sub-category</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Grievance Title</mat-label>
+              <input matInput formControlName="title" placeholder="Enter a brief title for your grievance">
+              <mat-icon matSuffix>title</mat-icon>
+              <mat-hint>Min 10 characters, Max 200 characters</mat-hint>
+              @if (grievanceForm.get('title')?.hasError('required') && grievanceForm.get('title')?.touched) {
+                <mat-error>Title is required</mat-error>
+              }
+              @if (grievanceForm.get('title')?.hasError('minlength')) {
+                <mat-error>Title must be at least 10 characters</mat-error>
+              }
+              @if (grievanceForm.get('title')?.hasError('maxlength')) {
+                <mat-error>Title cannot exceed 200 characters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="6" placeholder="Provide detailed description of your grievance"></textarea>
+              <mat-icon matSuffix>description</mat-icon>
+              <mat-hint>Min 20 characters, Max 2000 characters</mat-hint>
+              @if (grievanceForm.get('description')?.hasError('required') && grievanceForm.get('description')?.touched) {
+                <mat-error>Description is required</mat-error>
+              }
+              @if (grievanceForm.get('description')?.hasError('minlength')) {
+                <mat-error>Description must be at least 20 characters</mat-error>
+              }
+              @if (grievanceForm.get('description')?.hasError('maxlength')) {
+                <mat-error>Description cannot exceed 2000 characters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" routerLink="/citizen/dashboard">
+              <mat-icon>arrow_back</mat-icon>
+              Cancel
+            </button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                <mat-icon>send</mat-icon>
+              }
+              <span>{{ isSubmitting ? 'Submitting...' : 'Submit Grievance' }}</span>
+            </button>
+          </div>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
