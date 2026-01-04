@@ -1,1 +1,140 @@
-<p>grievance-details works!</p>
+<app-header></app-header>
+
+<div class="grievance-details-container">
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  }
+
+  @if (!isLoading && grievance) {
+    <div class="page-header">
+      <button mat-button routerLink="/officer/assigned-grievances">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Assigned Grievances
+      </button>
+    </div>
+
+    <mat-card class="details-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{ grievance.grievanceNumber }}
+          @if (isOverdue()) {
+            <mat-icon class="overdue-icon">error</mat-icon>
+            <span class="overdue-text">SLA Breached</span>
+          }
+        </mat-card-title>
+        <mat-card-subtitle>
+          <span class="status-chip" [ngClass]="getStatusClass(grievance.status)">
+            {{ grievance.status }}
+          </span>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <h2>{{ grievance.title }}</h2>
+
+        <div class="details-grid">
+          <div class="detail-item">
+            <mat-icon>business</mat-icon>
+            <div>
+              <label>Department</label>
+              <p>{{ grievance.departmentName }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>category</mat-icon>
+            <div>
+              <label>Category</label>
+              <p>{{ grievance.categoryName }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>label</mat-icon>
+            <div>
+              <label>Sub-Category</label>
+              <p>{{ grievance.subCategoryName }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item" [class.overdue]="isOverdue()">
+            <mat-icon>schedule</mat-icon>
+            <div>
+              <label>SLA Deadline</label>
+              <p>{{ grievance.slaDeadline | date:'medium' }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>calendar_today</mat-icon>
+            <div>
+              <label>Created At</label>
+              <p>{{ grievance.createdAt | date:'medium' }}</p>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>person</mat-icon>
+            <div>
+              <label>Citizen ID</label>
+              <p>{{ grievance.citizenId }}</p>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="description-section">
+          <h3>Description</h3>
+          <p>{{ grievance.description }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Update Status Section -->
+    @if (canUpdateStatus()) {
+      <mat-card class="update-status-card">
+        <mat-card-header>
+          <mat-card-title>Update Status</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="statusForm" (ngSubmit)="updateStatus()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>New Status</mat-label>
+              <mat-select formControlName="status">
+                @for (status of availableStatuses; track status.value) {
+                  <mat-option [value]="status.value">{{ status.label }}</mat-option>
+                }
+              </mat-select>
+              @if (statusForm.get('status')?.hasError('required') && statusForm.get('status')?.touched) {
+                <mat-error>Please select a status</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Remarks</mat-label>
+              <textarea matInput formControlName="remarks" rows="4" placeholder="Provide details about the status update..."></textarea>
+              @if (statusForm.get('remarks')?.hasError('required') && statusForm.get('remarks')?.touched) {
+                <mat-error>Remarks are required</mat-error>
+              }
+              @if (statusForm.get('remarks')?.hasError('minlength')) {
+                <mat-error>Remarks must be at least 10 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button mat-raised-button color="primary" type="submit" [disabled]="isUpdating">
+                @if (isUpdating) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                }
+                Update Status
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</div>
