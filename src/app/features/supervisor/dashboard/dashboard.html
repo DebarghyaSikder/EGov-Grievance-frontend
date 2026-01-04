@@ -1,1 +1,151 @@
-<p>dashboard works!</p>
+<app-header></app-header>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Supervisor Dashboard</h1>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" routerLink="/supervisor/all-grievances">
+        <mat-icon>list</mat-icon>
+        View All Grievances
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  @if (dashboardSummary) {
+    <div class="stats-container">
+      <mat-card class="stat-card total">
+        <mat-card-content>
+          <mat-icon>description</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.totalGrievances }}</h3>
+            <p>Total Grievances</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card pending">
+        <mat-card-content>
+          <mat-icon>pending_actions</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.pendingCount }}</h3>
+            <p>Pending</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card escalated">
+        <mat-card-content>
+          <mat-icon>warning</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.escalatedCount }}</h3>
+            <p>Escalated</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card resolved">
+        <mat-card-content>
+          <mat-icon>check_circle</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.resolvedCount }}</h3>
+            <p>Resolved</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card today">
+        <mat-card-content>
+          <mat-icon>today</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.todayCount }}</h3>
+            <p>Today</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card sla-breached">
+        <mat-card-content>
+          <mat-icon>error</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardSummary.slaBreachedCount }}</h3>
+            <p>SLA Breached</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+  <!-- Recent Grievances -->
+  <mat-card class="grievances-card">
+    <mat-card-header>
+      <mat-card-title>Recent Grievances</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (isLoading) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      }
+
+      @if (!isLoading && grievances.length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <p>No grievances found.</p>
+        </div>
+      }
+
+      @if (!isLoading && grievances.length > 0) {
+        <table mat-table [dataSource]="grievances.slice(0, 10)" class="grievances-table">
+          <ng-container matColumnDef="grievanceNumber">
+            <th mat-header-cell *matHeaderCellDef>Grievance #</th>
+            <td mat-cell *matCellDef="let g">
+              {{ g.grievanceNumber }}
+              @if (isOverdue(g)) {
+                <mat-icon class="overdue-icon">error</mat-icon>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let g" class="title-cell">{{ g.title }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="department">
+            <th mat-header-cell *matHeaderCellDef>Department</th>
+            <td mat-cell *matCellDef="let g">{{ g.departmentName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let g">
+              <span class="status-chip" [ngClass]="getStatusClass(g.status)">
+                {{ g.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="slaDeadline">
+            <th mat-header-cell *matHeaderCellDef>SLA Deadline</th>
+            <td mat-cell *matCellDef="let g" [class.overdue]="isOverdue(g)">
+              {{ g.slaDeadline | date:'medium' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let g">
+              <button mat-icon-button color="primary" [routerLink]="['/supervisor/grievance', g.id]">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.overdue-row]="isOverdue(row)"></tr>
+        </table>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
