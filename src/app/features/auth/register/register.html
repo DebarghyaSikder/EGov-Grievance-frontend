@@ -1,0 +1,115 @@
+<div class="register-container">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="header-icon">account_balance</mat-icon>
+        Create Account
+      </mat-card-title>
+      <mat-card-subtitle>Register for E-Governance Grievance Portal</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full Name</mat-label>
+          <input matInput formControlName="fullName" placeholder="Enter your full name">
+          <mat-icon matSuffix>person</mat-icon>
+          @if (registerForm.get('fullName')?.hasError('required') && registerForm.get('fullName')?.touched) {
+            <mat-error>Full name is required</mat-error>
+          }
+          @if (registerForm.get('fullName')?.hasError('minlength') && registerForm.get('fullName')?.touched) {
+            <mat-error>Name must be at least 3 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="Enter your email">
+          <mat-icon matSuffix>email</mat-icon>
+          @if (registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched) {
+            <mat-error>Email is required</mat-error>
+          }
+          @if (registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched) {
+            <mat-error>Please enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone Number</mat-label>
+          <input matInput formControlName="phone" placeholder="Enter 10-digit phone number">
+          <mat-icon matSuffix>phone</mat-icon>
+          @if (registerForm.get('phone')?.hasError('required') && registerForm.get('phone')?.touched) {
+            <mat-error>Phone number is required</mat-error>
+          }
+          @if (registerForm.get('phone')?.hasError('pattern') && registerForm.get('phone')?.touched) {
+            <mat-error>Please enter a valid 10-digit phone number</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Aadhaar Number</mat-label>
+          <input matInput formControlName="aadhaarNumber" placeholder="Enter 12-digit Aadhaar number">
+          <mat-icon matSuffix>badge</mat-icon>
+          @if (registerForm.get('aadhaarNumber')?.hasError('required') && registerForm.get('aadhaarNumber')?.touched) {
+            <mat-error>Aadhaar number is required</mat-error>
+          }
+          @if (registerForm.get('aadhaarNumber')?.hasError('pattern') && registerForm.get('aadhaarNumber')?.touched) {
+            <mat-error>Please enter a valid 12-digit Aadhaar number</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            @for (role of roles; track role.value) {
+              <mat-option [value]="role.value">{{ role.label }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matSuffix>work</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="Enter password">
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          @if (registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
+            <mat-error>Password is required</mat-error>
+          }
+          @if (registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
+            <mat-error>Password must be at least 6 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword" placeholder="Confirm password">
+          <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button">
+            <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          @if (registerForm.get('confirmPassword')?.hasError('required') && registerForm.get('confirmPassword')?.touched) {
+            <mat-error>Please confirm your password</mat-error>
+          }
+          @if (registerForm.get('confirmPassword')?.hasError('passwordMismatch')) {
+            <mat-error>Passwords do not match</mat-error>
+          }
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" class="full-width register-button" [disabled]="isLoading">
+          @if (isLoading) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            <span>Register</span>
+          }
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <p class="login-link">
+        Already have an account? <a routerLink="/login">Sign in here</a>
+      </p>
+    </mat-card-actions>
+  </mat-card>
+</div>
