@@ -1,0 +1,102 @@
+.all-grievances-container {
+  padding: 80px 20px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h1 {
+    margin: 0;
+    color: #333;
+  }
+}
+
+.loading-container, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #666;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.grievances-table {
+  width: 100%;
+
+  .title-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .overdue-icon {
+    color: #f44336;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-left: 5px;
+  }
+
+  .overdue {
+    color: #f44336;
+    font-weight: 500;
+  }
+
+  .overdue-row {
+    background-color: #ffebee;
+  }
+}
+
+.sortable {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: #1976d2;
+  }
+}
+
+.status-chip {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.status-pending { background-color: #fff3e0; color: #e65100; }
+  &.status-assigned { background-color: #e3f2fd; color: #1565c0; }
+  &.status-in-progress { background-color: #e8f5e9; color: #2e7d32; }
+  &.status-escalated { background-color: #ffebee; color: #c62828; }
+  &.status-resolved { background-color: #e8f5e9; color: #2e7d32; }
+  &.status-closed { background-color: #eceff1; color: #546e7a; }
+}
+
+mat-paginator {
+  margin-top: 10px;
+}
