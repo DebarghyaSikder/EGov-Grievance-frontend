@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HeaderComponent } from '../../../shared/components/header/header';
 import { GrievanceService } from '../../../core/services/grievance.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { Grievance, GrievanceStatus } from '../../../core/models/grievance.model';
+import { Grievance } from '../../../core/models/grievance.model';
 import { Notification } from '../../../core/models/notification.model';
 
 @Component({
@@ -32,6 +32,7 @@ export class DashboardComponent implements OnInit {
   grievances: Grievance[] = [];
   notifications: Notification[] = [];
   isLoading = true;
+  isLoadingNotifications = true;
 
   totalGrievances = 0;
   pendingGrievances = 0;
@@ -47,29 +48,53 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDashboardData();
+    this.loadNotifications();
   }
 
   loadDashboardData(): void {
     this.isLoading = true;
 
     this.grievanceService.getMyGrievances().subscribe({
-      next: (response) => {
-        if (response.success) {
+      next: (response: any) => {
+        console.log('My Grievances Response:', response);
+        if (response && response.success && response.data) {
           this.grievances = response.data;
-          this.calculateStatistics();
+        } else if (response && response.data) {
+          this.grievances = response.data;
+        } else if (Array.isArray(response)) {
+          this.grievances = response;
         }
+        this.calculateStatistics();
         this.isLoading = false;
       },
-      error: () => {
+      error: (error) => {
+        console.error('Error loading grievances:', error);
         this.isLoading = false;
       }
     });
+  }
+
+  loadNotifications(): void {
+    this.isLoadingNotifications = true;
 
     this.notificationService.getMyNotifications().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.notifications = response.data.slice(0, 5);
+      next: (response: any) => {
+        console.log('Notifications Response:', response);
+        if (response && response.success && response.data) {
+          this.notifications = response.data;
+        } else if (response && response.data) {
+          this.notifications = response.data;
+        } else if (Array.isArray(response)) {
+          this.notifications = response;
         }
+        // Limit to 5 most recent
+        this.notifications = this.notifications.slice(0, 5);
+        console.log('Parsed notifications:', this.notifications);
+        this.isLoadingNotifications = false;
+      },
+      error: (error) => {
+        console.error('Error loading notifications:', error);
+        this.isLoadingNotifications = false;
       }
     });
   }
@@ -77,20 +102,31 @@ export class DashboardComponent implements OnInit {
   calculateStatistics(): void {
     this.totalGrievances = this.grievances.length;
     this.pendingGrievances = this.grievances.filter(g =>
-      g.status === GrievanceStatus.PENDING ||
-      g.status === GrievanceStatus.ASSIGNED ||
-      g.status === GrievanceStatus.IN_PROGRESS
+      g.status === 'PENDING' ||
+      g.status === 'ASSIGNED' ||
+      g.status === 'IN_PROGRESS'
     ).length;
     this.resolvedGrievances = this.grievances.filter(g =>
-      g.status === GrievanceStatus.RESOLVED ||
-      g.status === GrievanceStatus.CLOSED
+      g.status === 'RESOLVED' ||
+      g.status === 'CLOSED'
     ).length;
     this.escalatedGrievances = this.grievances.filter(g =>
-      g.status === GrievanceStatus.ESCALATED
+      g.status === 'ESCALATED'
     ).length;
   }
 
   getStatusClass(status: string): string {
     return `status-${status.toLowerCase().replace('_', '-')}`;
+  }
+
+  getNotificationIcon(type: string): string {
+    switch (type) {
+      case 'GRIEVANCE_CREATED': return 'add_circle';
+      case 'STATUS_UPDATED': return 'update';
+      case 'GRIEVANCE_ASSIGNED': return 'person_add';
+      case 'GRIEVANCE_RESOLVED': return 'check_circle';
+      case 'GRIEVANCE_ESCALATED': return 'warning';
+      default: return 'notifications';
+    }
   }
 }
