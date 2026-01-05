@@ -67,19 +67,19 @@ export class GrievanceService {
   }
 
   // Get all grievances (supervisor/admin)
-  getAllGrievances(): Observable<ApiResponse<Grievance[]>> {
-    return this.http.get<ApiResponse<Grievance[]>>(`${this.apiUrl}/all`);
+  getAllGrievances(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/all`);
   }
 
   // Get all grievances - paginated
-  getAllGrievancesPaged(page: number = 0, size: number = 10, sortBy: string = 'createdAt', sortDir: string = 'desc'): Observable<ApiResponse<PageResponse<Grievance>>> {
+  getAllGrievancesPaged(page: number = 0, size: number = 10, sortBy: string = 'createdAt', sortDir: string = 'desc'): Observable<any> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sortBy', sortBy)
       .set('sortDir', sortDir);
 
-    return this.http.get<ApiResponse<PageResponse<Grievance>>>(`${this.apiUrl}/all/paged`, { params });
+    return this.http.get<any>(`${this.apiUrl}/all/paged`, { params });
   }
 
   // Get grievances by status

@@ -49,23 +49,31 @@ export class AllGrievancesComponent implements OnInit {
   }
 
   loadGrievances(): void {
-    this.isLoading = true;
+  this.isLoading = true;
 
-    this.grievanceService.getAllGrievancesPaged(this.pageIndex, this.pageSize, this.sortBy, this.sortDir).subscribe({
-      next: (response: any) => {
-        // Response format: { success: true, message: "Success", data: { content: [...], totalElements: n } }
-        if (response && response.success && response.data) {
-          this.grievances = response.data.content || [];
-          this.totalElements = response.data.totalElements || 0;
-        }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading grievances:', error);
-        this.isLoading = false;
+  console.log('Loading grievances...');
+
+  this.grievanceService.getAllGrievancesPaged(this.pageIndex, this.pageSize, this.sortBy, this.sortDir).subscribe({
+    next: (response: any) => {
+      console.log('Raw response:', response);
+      console.log('response.success:', response?.success);
+      console.log('response.data:', response?.data);
+      console.log('response.data.content:', response?.data?.content);
+
+      if (response && response.success && response.data) {
+        this.grievances = response.data.content || [];
+        this.totalElements = response.data.totalElements || 0;
+        console.log('Parsed grievances:', this.grievances);
+        console.log('Total elements:', this.totalElements);
       }
-    });
-  }
+      this.isLoading = false;
+    },
+    error: (error) => {
+      console.error('Error loading grievances:', error);
+      this.isLoading = false;
+    }
+  });
+}
 
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
