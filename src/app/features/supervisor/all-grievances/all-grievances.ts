@@ -52,14 +52,16 @@ export class AllGrievancesComponent implements OnInit {
     this.isLoading = true;
 
     this.grievanceService.getAllGrievancesPaged(this.pageIndex, this.pageSize, this.sortBy, this.sortDir).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.grievances = response.data.content;
-          this.totalElements = response.data.totalElements;
+      next: (response: any) => {
+        // Response format: { success: true, message: "Success", data: { content: [...], totalElements: n } }
+        if (response && response.success && response.data) {
+          this.grievances = response.data.content || [];
+          this.totalElements = response.data.totalElements || 0;
         }
         this.isLoading = false;
       },
-      error: () => {
+      error: (error) => {
+        console.error('Error loading grievances:', error);
         this.isLoading = false;
       }
     });

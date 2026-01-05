@@ -47,21 +47,29 @@ export class SupervisorDashboardComponent implements OnInit {
     this.isLoading = true;
 
     this.reportService.getDashboardSummary().subscribe({
-      next: (response) => {
-        if (response.success) {
+      next: (response: any) => {
+        // Response format: { success: true, data: { ... } }
+        if (response && response.success && response.data) {
           this.dashboardSummary = response.data;
+        } else if (response && !response.success) {
+          this.dashboardSummary = response;
         }
+      },
+      error: (error) => {
+        console.error('Error loading dashboard summary:', error);
       }
     });
 
     this.grievanceService.getAllGrievances().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.grievances = response.data;
+      next: (response: any) => {
+        // Response format: { success: true, data: [...] }
+        if (response && response.success && response.data) {
+          this.grievances = Array.isArray(response.data) ? response.data : [];
         }
         this.isLoading = false;
       },
-      error: () => {
+      error: (error) => {
+        console.error('Error loading grievances:', error);
         this.isLoading = false;
       }
     });
